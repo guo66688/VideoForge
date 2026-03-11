@@ -43,6 +43,18 @@ sudo apt-get install -y ffmpeg
 
 ## 使用方式
 
+### 先做环境诊断
+
+```bash
+make diagnose
+```
+
+如果你想同时检查某个视频链接是否能被 `yt-dlp` 正常读取，可以这样执行：
+
+```bash
+make diagnose URL="https://example.com/video"
+```
+
 ### 运行主流程
 
 ```bash
@@ -61,6 +73,7 @@ make run URL="https://example.com/video"
 ```bash
 cd /home/icoffee/Projects/VideoForge
 make install
+make diagnose
 make run URL="https://example.com/video"
 ```
 
@@ -72,6 +85,7 @@ VideoForge/
 ├── README.md
 ├── requirements.txt
 ├── scripts/
+│   ├── diagnose.sh
 │   ├── run.sh
 │   └── transcribe.py
 └── output/
@@ -82,6 +96,7 @@ VideoForge/
 - `Makefile`：统一安装、运行和清理入口
 - `.venv/`：项目内固定 Python 虚拟环境，由 `make install` 自动创建
 - `requirements.txt`：Python 最小依赖列表
+- `scripts/diagnose.sh`：环境诊断脚本，检查虚拟环境、依赖和系统工具
 - `scripts/run.sh`：主流程脚本，负责下载字幕、下载音频、调用转写
 - `scripts/transcribe.py`：使用 `faster-whisper` 将音频转成文本
 - `output/`：输出字幕、音频和转写结果
@@ -107,6 +122,12 @@ make install
 ### 3. 下载音频时报 `ffmpeg` 相关错误
 
 这是因为系统没有安装 `ffmpeg`，请先安装系统依赖后再重试。
+
+也可以先执行下面的命令做诊断：
+
+```bash
+make diagnose
+```
 
 ### 4. 转写阶段较慢
 

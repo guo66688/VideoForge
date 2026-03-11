@@ -1,20 +1,24 @@
 SYSTEM_PYTHON := python3
 VENV_DIR := .venv
-PYTHON := $(VENV_DIR)/bin/python
-PIP := $(VENV_DIR)/bin/pip
-YT_DLP := $(VENV_DIR)/bin/yt-dlp
+PROJECT_ROOT := $(abspath .)
+PYTHON := $(PROJECT_ROOT)/$(VENV_DIR)/bin/python
+PIP := $(PROJECT_ROOT)/$(VENV_DIR)/bin/pip
+YT_DLP := $(PROJECT_ROOT)/$(VENV_DIR)/bin/yt-dlp
 OUTPUT_DIR := output
 RUN_SCRIPT := scripts/run.sh
+DIAGNOSE_SCRIPT := scripts/diagnose.sh
 
-.PHONY: help install run clean
+.PHONY: help install diagnose run clean
 
 help:
 	@echo "VideoForge v0.1 可用命令："
 	@echo "  make install                         在项目内创建 .venv 并安装依赖"
+	@echo "  make diagnose                        检查虚拟环境、依赖与系统工具是否就绪"
 	@echo "  make run URL=\"https://example.com/video\"   使用 .venv 执行下载字幕或转写"
 	@echo "  make clean                           清理 output/ 下生成文件"
 	@echo ""
 	@echo "命令示例："
+	@echo "  make diagnose"
 	@echo "  make run URL=\"https://example.com/video\""
 
 install:
@@ -24,6 +28,10 @@ install:
 	@$(PYTHON) -m pip install --upgrade pip
 	@$(PIP) install -r requirements.txt
 	@echo "依赖安装完成。"
+
+diagnose:
+	@mkdir -p $(OUTPUT_DIR)
+	@bash $(DIAGNOSE_SCRIPT) "$(OUTPUT_DIR)" "$(PYTHON)" "$(PIP)" "$(YT_DLP)" "$(URL)"
 
 run:
 	@if [ -z "$(URL)" ]; then \

@@ -34,10 +34,21 @@ echo "输出目录：$(pwd)"
 echo "当前使用环境：$PYTHON_BIN"
 
 echo "正在获取视频 ID..."
-if ! VIDEO_ID_RAW="$("$YT_DLP_BIN" --get-id "$URL" 2>/dev/null)"; then
-    echo "错误：无法读取视频信息，请检查链接是否有效，或确认当前网络可以访问目标站点。"
+YT_DLP_ERROR_FILE="$(mktemp)"
+
+if ! VIDEO_ID_RAW="$("$YT_DLP_BIN" --get-id "$URL" 2>"$YT_DLP_ERROR_FILE")"; then
+    echo "错误：无法读取视频信息。"
+    if [ -s "$YT_DLP_ERROR_FILE" ]; then
+        echo "yt-dlp 原始错误："
+        cat "$YT_DLP_ERROR_FILE"
+    else
+        echo "请检查链接是否有效，或确认当前网络可以访问目标站点。"
+    fi
+    rm -f "$YT_DLP_ERROR_FILE"
     exit 1
 fi
+
+rm -f "$YT_DLP_ERROR_FILE"
 
 VIDEO_ID="$(printf '%s\n' "$VIDEO_ID_RAW" | head -n 1 | tr -d '\r')"
 
@@ -67,6 +78,13 @@ if ls "${VIDEO_ID}"*.srt >/dev/null 2>&1; then
     echo "生成文件："
     ls -1 "${VIDEO_ID}"*.srt
     exit 0
+fi
+
+if ! command -v ffmpeg >/dev/null 2>&1 || ! command -v ffprobe >/dev/null 2>&1; then
+    echo "错误：当前系统未安装 ffmpeg 或 ffprobe，无法下载音频并转写。"
+    echo "请先安装系统依赖后重试。"
+    echo "Ubuntu 或 Debian 示例：sudo apt-get update && sudo apt-get install -y ffmpeg"
+    exit 1
 fi
 
 echo "未找到可用字幕，开始下载音频..."
