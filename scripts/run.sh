@@ -26,6 +26,24 @@ if [ ! -x "$YT_DLP_BIN" ]; then
     exit 1
 fi
 
+prepare_cuda_library_path() {
+    CUDA_LIB_PATH="$("$PYTHON_BIN" -c 'import importlib.util, os
+paths = []
+for name in ("nvidia.cublas.lib", "nvidia.cudnn.lib"):
+    spec = importlib.util.find_spec(name)
+    if spec is None or spec.origin is None:
+        raise SystemExit(1)
+    paths.append(os.path.dirname(spec.origin))
+print(":".join(paths))' 2>/dev/null || true)"
+
+    if [ -n "$CUDA_LIB_PATH" ]; then
+        export LD_LIBRARY_PATH="$CUDA_LIB_PATH${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+        echo "已自动注入 CUDA 库路径。"
+    else
+        echo "提示：未检测到可用的 CUDA Python 运行库，将按 GPU 优先、CPU 回退策略继续。"
+    fi
+}
+
 mkdir -p "$OUTPUT_DIR"
 cd "$OUTPUT_DIR"
 
@@ -95,6 +113,7 @@ echo "未找到可用字幕，开始下载音频..."
     "$URL"
 
 echo "开始执行中文转写..."
+prepare_cuda_library_path
 "$PYTHON_BIN" "$TRANSCRIBE_SCRIPT" "$(pwd)" "$VIDEO_ID"
 
 echo "处理完成，生成文件如下："

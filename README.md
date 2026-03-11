@@ -62,6 +62,7 @@ make run URL="https://example.com/video"
 ```
 
 `make run` 会自动使用项目内 `.venv` 中的 `python` 和 `yt-dlp`。
+如果虚拟环境里已安装 GPU 所需的 `cuBLAS` 和 `cuDNN` Python 包，运行时也会自动注入对应库路径，不需要手动 `export LD_LIBRARY_PATH`。
 
 ### 执行结果
 
@@ -131,7 +132,7 @@ make diagnose
 
 ### 4. 转写阶段较慢
 
-`faster-whisper` 首次运行会下载模型文件，速度取决于网络和机器性能。v0.1 默认使用 `small` 模型和 `int8` 计算类型，优先保证稳定和维护成本低。
+`faster-whisper` 首次运行会下载模型文件，速度取决于网络和机器性能。v0.1 默认使用 `small` 模型和 `int8` 计算类型，优先尝试 GPU；如果 GPU 或 CUDA 依赖不可用，会自动回退到 CPU。转写过程中会根据音频总时长显示进度条和预计剩余时间。
 
 ### 5. 为什么有时输出的是 `.srt`，有时是 `.txt`
 
