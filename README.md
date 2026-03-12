@@ -19,7 +19,7 @@ v0.1 版本只解决一件事：稳定地把视频内容变成文本资产，方
 ### 1. 进入项目目录
 
 ```bash
-cd /home/icoffee/Projects/VideoForge
+cd VideoForge
 ```
 
 ### 2. 在项目内创建固定虚拟环境并安装依赖
@@ -72,7 +72,7 @@ make run URL="https://example.com/video"
 ## 完整命令示例
 
 ```bash
-cd /home/icoffee/Projects/VideoForge
+cd VideoForge
 make install
 make diagnose
 make run URL="https://example.com/video"
