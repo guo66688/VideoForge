@@ -31,14 +31,22 @@ prepare_cuda_library_path() {
 paths = []
 for name in ("nvidia.cublas.lib", "nvidia.cudnn.lib"):
     spec = importlib.util.find_spec(name)
-    if spec is None or spec.origin is None:
-        raise SystemExit(1)
-    paths.append(os.path.dirname(spec.origin))
+    if spec is None:
+        continue
+
+    locations = list(spec.submodule_search_locations or [])
+    if locations:
+        paths.append(locations[0])
+        continue
+
+    if spec.origin:
+        paths.append(os.path.dirname(spec.origin))
+
 print(":".join(paths))' 2>/dev/null || true)"
 
     if [ -n "$CUDA_LIB_PATH" ]; then
         export LD_LIBRARY_PATH="$CUDA_LIB_PATH${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-        echo "已自动注入 CUDA 库路径。"
+        echo "已自动注入 CUDA 库路径：$CUDA_LIB_PATH"
     else
         echo "提示：未检测到可用的 CUDA Python 运行库，将按 GPU 优先、CPU 回退策略继续。"
     fi

@@ -60,6 +60,31 @@ if [ -x "$PYTHON_BIN" ]; then
     fi
 fi
 
+if [ -x "$PYTHON_BIN" ]; then
+    CUDA_LIB_PATH="$("$PYTHON_BIN" -c 'import importlib.util, os
+paths = []
+for name in ("nvidia.cublas.lib", "nvidia.cudnn.lib"):
+    spec = importlib.util.find_spec(name)
+    if spec is None:
+        continue
+
+    locations = list(spec.submodule_search_locations or [])
+    if locations:
+        paths.append(locations[0])
+        continue
+
+    if spec.origin:
+        paths.append(os.path.dirname(spec.origin))
+
+print(":".join(paths))' 2>/dev/null || true)"
+
+    if [ -n "$CUDA_LIB_PATH" ]; then
+        pass "已定位 CUDA Python 运行库目录：$CUDA_LIB_PATH"
+    else
+        fail "未能从虚拟环境定位 CUDA Python 运行库目录。GPU 转写将无法加载 cuBLAS/cuDNN。"
+    fi
+fi
+
 if command -v ffmpeg >/dev/null 2>&1; then
     pass "ffmpeg 已安装：$(ffmpeg -version | head -n 1)"
 else
